@@ -8,7 +8,7 @@
 ## Execution
 
 ```
-docker-compose up
+docker compose up
 ```
 
 Application will be then running on port `5000`
