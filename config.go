@@ -6,10 +6,10 @@ import (
 )
 
 type Config struct {
-	Port int `default:"5000"`
+	Port int `envconfig:"PORT" default:"5000"`
 }
 
-func NewConfig() (*Config, error) {
+func newConfig() (*Config, error) {
 	var cfg Config
 	err := envconfig.Process("", &cfg)
 	if err != nil {

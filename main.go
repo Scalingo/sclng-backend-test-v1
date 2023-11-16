@@ -13,24 +13,29 @@ import (
 func main() {
 	log := logger.Default()
 	log.Info("Initializing app")
-	cfg, err := NewConfig()
+	cfg, err := newConfig()
 	if err != nil {
 		log.WithError(err).Error("Fail to initialize configuration")
-		os.Exit(-1)
+		os.Exit(1)
 	}
 
 	log.Info("Initializing routes")
 	router := handlers.NewRouter(log)
-	router.HandleFunc("/ping", PongHandler)
+	router.HandleFunc("/ping", pongHandler)
 	// Initialize web server and configure the following routes:
 	// GET /repos
 	// GET /stats
 
-	log.WithField("port", cfg.Port).Info("Listening...")
-	http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), router)
+	log = log.WithField("port", cfg.Port)
+	log.Info("Listening...")
+	err = http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), router)
+	if err != nil {
+		log.WithError(err).Error("Fail to listen to the given port")
+		os.Exit(2)
+	}
 }
 
-func PongHandler(w http.ResponseWriter, r *http.Request, params map[string]string) error {
+func pongHandler(w http.ResponseWriter, r *http.Request, _ map[string]string) error {
 	log := logger.Get(r.Context())
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
