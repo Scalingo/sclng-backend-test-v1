@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 )
 
 func RequestIDMiddleware(next HandlerFunc) HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, vars map[string]string) error {
 		id := r.Header.Get("X-Request-ID")
-		if len(id) == 0 {
+		if id == "" {
 			uuid, err := uuid.NewV4()
 			if err != nil {
 				return fmt.Errorf("fail to generate UUID for X-Request-ID: %v", err)
