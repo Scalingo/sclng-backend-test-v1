@@ -1,5 +1,46 @@
 # Changelog
 
+## To be Released
+
+## v1.8.1
+
+* feat(errors): add bad request errors
+
+## v1.8.0
+
+* feat(middleware): add a middleware to reject HTTP request
+* feat(middleware): Add secure headers middleware
+
+## v1.7.0
+
+* feat(router): add profiling router using pprof
+
+## v1.6.0
+
+* chore(deps): bump github.com/gofrs/uuid from 4.3.0+incompatible to 4.3.1+incompatible
+* feat(error_middleware): use RootCtxOrFallback to retrieve ctx and get its logger
+
+## v1.5.0
+
+* feat(error_middleware): return 401 for invalid token errors
+* chore(deps): bump github.com/stretchr/testify from 1.8.0 to 1.8.1
+
+## v1.4.5
+
+* feat(error_middleware): log at info level for all non-5xx errors
+* chore(deps): bump github.com/gofrs/uuid from 4.2.0+incompatible to 4.3.0+incompatible
+* chore(deps): bump github.com/Scalingo/go-utils/logger
+* chore(deps): bump github.com/sirupsen/logrus from 1.8.1 to 1.9.0
+
+## v1.4.4
+
+* chore(go): use go 1.17
+* Bump github.com/stretchr/testify from 1.7.0 to 1.7.1
+
+## v1.4.3
+
+* feat(error_middleware): log and error for all 5xx status code
+
 ## v1.4.2
 
 * fix(error_middleware): better detection of JSON Content-Type

@@ -6,4 +6,4 @@ services:
       - ./:/go/src/github.com/Scalingo/sclng-backend-test-v1
     ports:
       - "5000:5000"
-    command: reflex -r '\.go$$' -s -- sh -c 'go build -mod=vendor && ./sclng-backend-test-v1'
+    command: reflex -r '\.go$$' -s -- sh -c 'go build -buildvcs=false && ./sclng-backend-test-v1'
