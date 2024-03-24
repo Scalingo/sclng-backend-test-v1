@@ -1,50 +1,20 @@
-package main
+package server
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"sync"
 	"time"
 
-	"github.com/Scalingo/go-handlers"
 	"github.com/Scalingo/go-utils/logger"
+	"github.com/Scalingo/sclng-backend-test-v1/pkg/models"
 	"github.com/google/go-github/v60/github"
 )
 
-func main() {
-	log := logger.Default()
-	log.Info("Initializing app")
-	cfg, err := newConfig()
-	if err != nil {
-		log.WithError(err).Error("Fail to initialize configuration")
-		os.Exit(1)
-	}
-
-	log.Info("Initializing routes")
-	router := handlers.NewRouter(log)
-	router.HandleFunc("/ping", pongHandler)
-	router.HandleFunc("/listRepo", listLastHandredPublicRepo)
-	router.HandleFunc("/listAgragateRepo", agregateLastHandredPublicRepo)
-	// Initialize web server and configure the following routes:
-	// GET /repos
-	// GET /stats
-
-	log = log.WithField("port", cfg.Port)
-	log.Info("Listening...")
-	err = http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), router)
-	if err != nil {
-		log.WithError(err).Error("Fail to listen to the given port")
-		os.Exit(2)
-	}
-
-}
-
-func pongHandler(w http.ResponseWriter, r *http.Request, _ map[string]string) error {
+func PongHandler(w http.ResponseWriter, r *http.Request, _ map[string]string) error {
 	log := logger.Get(r.Context())
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -56,7 +26,7 @@ func pongHandler(w http.ResponseWriter, r *http.Request, _ map[string]string) er
 	return nil
 }
 
-func listLastHandredPublicRepo(w http.ResponseWriter, r *http.Request, _ map[string]string) error {
+func ListLastHandredPublicRepo(w http.ResponseWriter, r *http.Request, _ map[string]string) error {
 	log := logger.Get(r.Context())
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -88,14 +58,7 @@ func listLastHandredPublicRepo(w http.ResponseWriter, r *http.Request, _ map[str
 	return nil
 }
 
-type AgrRepo struct {
-	FullName   *string         `json:"full_name,omitempty"`
-	Owner      *string         `json:"owner,omitempty"`
-	Repository *string         `json:"repository,omitempty"`
-	Languages  json.RawMessage `json:"languages,omitempty"`
-}
-
-func agregateLastHandredPublicRepo(w http.ResponseWriter, r *http.Request, _ map[string]string) error {
+func AgregateLastHandredPublicRepo(w http.ResponseWriter, r *http.Request, _ map[string]string) error {
 	log := logger.Get(r.Context())
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -118,7 +81,7 @@ func agregateLastHandredPublicRepo(w http.ResponseWriter, r *http.Request, _ map
 		log.WithError(err).Error("Fail to list Repos")
 		return err
 	}
-	var listAgrRepos []AgrRepo
+	var listAgrRepos []models.AgrRepo
 	var wg sync.WaitGroup
 	var mu sync.Mutex // Mutex for synchronization
 	// Add to WaitGroup for each goroutine
@@ -138,14 +101,14 @@ func agregateLastHandredPublicRepo(w http.ResponseWriter, r *http.Request, _ map
 	return nil
 }
 
-func addRepoAgregateData(listAgrRepos *[]AgrRepo, repo *github.Repository, mu *sync.Mutex, wg *sync.WaitGroup) {
+func addRepoAgregateData(listAgrRepos *[]models.AgrRepo, repo *github.Repository, mu *sync.Mutex, wg *sync.WaitGroup) {
 	defer wg.Done()
 	log := logger.Get(context.Background())
 	bodyStatsLang, err := getLanguagesStats(repo.GetLanguagesURL())
 	if err != nil {
 		log.WithError(err).Error("Fail to get languages stats")
 	}
-	agrRepos := &AgrRepo{
+	agrRepos := &models.AgrRepo{
 		FullName:   repo.FullName,
 		Owner:      repo.Owner.Login,
 		Repository: repo.Name,

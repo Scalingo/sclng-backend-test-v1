@@ -6,5 +6,5 @@ services:
       - ./:/go/src/github.com/Scalingo/sclng-backend-test-v1
     ports:
       - "5000:5000"
-    command: reflex -r '\.go$$' -s -- sh -c 'go build -buildvcs=false && ./sclng-backend-test-v1'
+    command: reflex -r '\.go$$' -s -- sh -c 'cd cmd/sclng-backend-test-v1 && go build -buildvcs=false  && ./sclng-backend-test-v1'
     stop_signal: SIGKILL

@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"github.com/kelseyhightower/envconfig"
@@ -9,7 +9,7 @@ type Config struct {
 	Port int `envconfig:"PORT" default:"5000"`
 }
 
-func newConfig() (*Config, error) {
+func NewConfig() (*Config, error) {
 	var cfg Config
 	err := envconfig.Process("", &cfg)
 	if err != nil {

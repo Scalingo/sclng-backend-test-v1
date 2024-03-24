@@ -2,8 +2,6 @@ module github.com/Scalingo/sclng-backend-test-v1
 
 go 1.20
 
-toolchain go1.22.1
-
 require (
 	github.com/Scalingo/go-handlers v1.8.1
 	github.com/Scalingo/go-utils/logger v1.2.0
