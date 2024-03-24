@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/Scalingo/go-utils/logger"
-	"github.com/Scalingo/sclng-backend-test-v1/pkg/models"
+	"github.com/Scalingo/sclng-backend-test-v1/internal/models"
 	"github.com/google/go-github/v60/github"
 )
 
@@ -151,7 +151,7 @@ func getLanguagesStats(LanguagesURL string) (json.RawMessage, error) {
 	defer resp.Body.Close()
 	byteBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.WithError(err).Error("Fail Read body languages ")
+		log.WithError(err).Error("Fail to read body languages ")
 		return nil, err
 
 	}
