@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/Scalingo/go-handlers"
@@ -113,30 +114,22 @@ func agregateLastHandredPublicRepo(w http.ResponseWriter, r *http.Request, _ map
 	t := time.Now().Format(time.RFC3339)
 	// Get last 100 public repos (no auth is required) vs created date
 	repos, _, err := client.Search.Repositories(context.Background(), filter+"created:<"+t, opt)
-
-	var listAgrRepos []AgrRepo
-	for _, repo := range repos.Repositories {
-		bodyStatsLang, err := getLanguagesStats(repo.GetLanguagesURL())
-		if err != nil {
-			log.WithError(err).Error("Fail to get languages stats")
-			return err
-		}
-		agrRepos := &AgrRepo{
-			FullName:   repo.FullName,
-			Owner:      repo.Owner.Login,
-			Repository: repo.Name,
-			Languages:  bodyStatsLang,
-		}
-
-		listAgrRepos = append(listAgrRepos, *agrRepos)
-
-	}
-
 	if err != nil {
 		log.WithError(err).Error("Fail to list Repos")
 		return err
 	}
-	//jsonContent, err := json.MarshalIndent(repos, "", "    ")
+	var listAgrRepos []AgrRepo
+	var wg sync.WaitGroup
+	var mu sync.Mutex // Mutex for synchronization
+	// Add to WaitGroup for each goroutine
+	wg.Add(len(repos.Repositories))
+
+	for _, repo := range repos.Repositories {
+		go addRepoAgregateData(&listAgrRepos, repo, &mu, &wg)
+	}
+	// Wait for all goroutines to finish
+	wg.Wait()
+
 	err = json.NewEncoder(w).Encode(listAgrRepos)
 	if err != nil {
 		log.WithError(err).Error("Fail to encode JSON")
@@ -145,6 +138,25 @@ func agregateLastHandredPublicRepo(w http.ResponseWriter, r *http.Request, _ map
 	return nil
 }
 
+func addRepoAgregateData(listAgrRepos *[]AgrRepo, repo *github.Repository, mu *sync.Mutex, wg *sync.WaitGroup) {
+	defer wg.Done()
+	log := logger.Get(context.Background())
+	bodyStatsLang, err := getLanguagesStats(repo.GetLanguagesURL())
+	if err != nil {
+		log.WithError(err).Error("Fail to get languages stats")
+	}
+	agrRepos := &AgrRepo{
+		FullName:   repo.FullName,
+		Owner:      repo.Owner.Login,
+		Repository: repo.Name,
+		Languages:  bodyStatsLang,
+	}
+	// Protect access to the slice with a mutex
+	mu.Lock()
+	*listAgrRepos = append(*listAgrRepos, *agrRepos)
+	mu.Unlock()
+	log.Info(" HEre addRepoAgregateData")
+}
 func getUrlFilter(urlRawQuery string) string {
 	log := logger.Get(context.Background())
 	params, err := url.ParseQuery(urlRawQuery)
