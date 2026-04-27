@@ -1,0 +1,9 @@
+dependencies = []
+description = "Canvas for Backend Technical Test at Scalingo"
+destination_server = []
+flags = []
+languages = ["go"]
+owner = "team-infrastructure-services@scalingo.com"
+tier = 2
+team = "IST"
+version = "1.1.2"
